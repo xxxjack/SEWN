@@ -1,0 +1,20 @@
+# 模型文件 (太大)
+*.pt
+*.pth
+*.bin
+
+# 缓存
+__pycache__/
+*.pyc
+.cache/
+
+# 数据集 (太大)
+data/wikitext103/test/data-*.arrow
+data/wikitext103/train/data-*.arrow
+data/wikitext103/validation/data-*.arrow
+data/wikitext2/test/data-*.arrow
+data/wikitext2/train/data-*.arrow
+data/wikitext2/validation/data-*.arrow
+
+# 日志
+*.log
