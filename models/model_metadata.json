@@ -1,0 +1,104 @@
+{
+  "models": {
+    "exp9_sewn": {
+      "name": "SEWN (Self-Evolving World Model)",
+      "version": "v0.1",
+      "experiment_id": "exp9",
+      "best_epoch": 8,
+      "metrics": {
+        "best_ppl": 1.0005604482972408,
+        "val_loss": 0.0006,
+        "confidence": 0.925
+      },
+      "architecture": {
+        "type": "SEWN",
+        "layers": 4,
+        "worlds_per_layer": 4,
+        "hidden_dim": 512,
+        "vocab_size": 10000,
+        "max_seq_len": 256,
+        "components": {
+          "consciousness_layer": true,
+          "metacognition_layer": true,
+          "dynamic_routing": true
+        }
+      },
+      "parameters": {
+        "total": 24415796,
+        "trainable": 24415796,
+        "layer_breakdown": {
+          "embedding": 1,
+          "pos_embedding": 1,
+          "layers": 196,
+          "norm": 2,
+          "head": 2
+        }
+      },
+      "training": {
+        "dataset": "WikiText-103",
+        "batch_size": 16,
+        "learning_rate": 8e-05,
+        "epochs": 10,
+        "optimizer": "AdamW",
+        "scheduler": "CosineAnnealing"
+      },
+      "file": {
+        "name": "best_model_exp9.pt",
+        "size_mb": 94,
+        "path": "~/autodl-tmp/dhsm-research/experiments/best_model_exp9.pt"
+      },
+      "timestamp": "2026-03-15T05:51:00+08:00",
+      "status": "completed"
+    },
+    "exp10_ablation_metacognition": {
+      "name": "SEWN Ablation B (Metacognition)",
+      "version": "v0.1-ablation",
+      "experiment_id": "exp10",
+      "best_epoch": 1,
+      "metrics": {
+        "best_ppl": null,
+        "val_loss": 0.0014,
+        "confidence": null
+      },
+      "architecture": {
+        "type": "SEWN-Ablation",
+        "layers": 4,
+        "worlds_per_layer": 4,
+        "hidden_dim": 512,
+        "vocab_size": 10000,
+        "max_seq_len": 256,
+        "components": {
+          "consciousness_layer": true,
+          "metacognition_layer": false,
+          "dynamic_routing": true
+        }
+      },
+      "parameters": {
+        "total": 24415796,
+        "trainable": 24415796
+      },
+      "training": {
+        "dataset": "WikiText-103",
+        "batch_size": 16,
+        "learning_rate": 8e-05,
+        "epochs": 10,
+        "optimizer": "AdamW",
+        "scheduler": "Fixed"
+      },
+      "file": {
+        "name": "exp10_best.pt",
+        "size_mb": 93,
+        "path": "~/autodl-tmp/dhsm-research/experiments/exp10_best.pt"
+      },
+      "timestamp": "2026-03-16T06:24:00+08:00",
+      "status": "in_progress"
+    }
+  },
+  "metadata": {
+    "project": "DHSM (Dynamic Hybrid State Model)",
+    "version": "0.1",
+    "created_at": "2026-03-16T08:22:00+08:00",
+    "total_models": 2,
+    "repository": "local"
+  }
+}
