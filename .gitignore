@@ -1,0 +1,70 @@
+# .gitignore for SEWN repository
+
+# Memory and logs
+memory/
+MEMORY.md
+HEARTBEAT.md
+IDENTITY.md
+BOOTSTRAP.md
+SOUL.md
+AGENTS.md
+USER.md
+TOOLS.md
+
+# Config files
+*.yaml
+config.*
+
+# SSH and keys
+.ssh/
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+dhsm-env/
+env/
+venv/
+.venv/
+
+# Model weights
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.safetensors
+
+# Data files
+data/
+*.csv
+*.json
+!results/*.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+*.log
+*.tmp
+*.txt
+!requirements.txt
+
+# ClawHub
+.clawhub/
+.openclaw/
+
+# Temporary files
+reply_*.txt
+discussion_*.txt
+collab_*.txt
