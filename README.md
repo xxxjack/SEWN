@@ -7,8 +7,28 @@ A novel neural architecture for language modeling that combines consciousness, m
 SEWN (Self-Evolving World Model) is an experimental architecture that introduces:
 
 - **Consciousness Layer**: Selective attention and working memory
-- **Metacognition Layer**: Self-monitoring and learning rate adaptation
+- **Metacognition Layer**: Self-monitoring and learning rate adaptation (conditional)
 - **Dynamic Routing**: Multi-world state management with learned routing
+- **ASN Framework**: Adaptive Structure Network for task-complexity-aware architecture selection
+
+## Key Findings (2026-03-18)
+
+### Metacognition Layer = Conditional Regularizer
+
+Our experiments reveal that the metacognition layer serves as a **conditional regularizer**, not just a stability mechanism:
+
+| Design | Simple Tasks | Complex Tasks | Recommendation |
+|--------|--------------|---------------|----------------|
+| None (NoMeta) | ✅ Stable | ⚠️ Risk | Low learning rate required |
+| Light (MetaLite) | ✅ Best | ✅ Best | **Recommended** |
+| Full (FullMeta) | ✅ | ❌ Overfits | Avoid |
+
+### Critical Training Parameters
+
+| Parameter | Risky | Stable | Notes |
+|-----------|-------|--------|-------|
+| Learning Rate | 8e-5 | 5e-5 | Lower LR prevents gradient explosion |
+| Gradient Clipping | None | max_norm=1.0 | Essential for stability |
 
 ## Architecture
 
@@ -17,90 +37,88 @@ Input → Embedding → [SEWN Layer × 4] → Output
                       ↓
               ┌───────────────────┐
               │ Consciousness     │ → Attention weights
-              │ Metacognition     │ → Confidence score
+              │ Metacognition     │ → Confidence score (optional)
               │ Dynamic Routing   │ → World selection
               └───────────────────┘
 ```
 
-### Configuration
+### ASN Framework (New)
 
-| Parameter | Value |
-|-----------|-------|
-| Layers | 4 |
-| Worlds per Layer | 4 |
-| Hidden Dimension | 512 |
-| Vocabulary Size | 10,000 |
-| Max Sequence Length | 256 |
-| Total Parameters | 24,415,796 |
+```
+Input Complexity Estimation
+         ↓
+┌────────┼────────┐
+│ Simple │ Medium │ Complex │
+│ (2 worlds) │ (4 worlds) │ (8 worlds) │
+└────────┴────────┴────────┘
+         ↓
+    MetaLite (optional)
+         ↓
+      Output
+```
 
 ## Experiments
 
-### Experiment 9: SEWN Prototype (v0.1)
+### Experiment 10: Metacognition Ablation
+
+**Status**: ✅ Completed (with crash)
+
+| Epoch | Train Loss | Val Loss | Status |
+|-------|-----------|----------|--------|
+| 1 | 0.7157 | 0.0014 | ✅ |
+| 2 | 0.0012 | 0.0003 | ✅ |
+| 3 | 0.0002 | **0.0001** | ✅ Best |
+| 4 | 0.0001 | **0.0001** | ✅ |
+| 5 | NaN | NaN | ❌ **Crashed** |
+
+**Key Finding**: Without metacognition layer + high learning rate (8e-5), training collapses at Epoch 5.
+
+### MetaLite Experiments (Simple Tasks)
 
 **Status**: ✅ Completed
 
-| Metric | Value |
-|--------|-------|
-| Best Epoch | 8 |
-| Best Validation Loss | 0.0006 |
-| Confidence Score | 0.925 |
-| Target Achievement | 83% improvement |
+| Model | Params | Val Loss | Status |
+|-------|--------|----------|--------|
+| A_NoMeta | 6.7M | 9.3601 | ✅ Stable |
+| B_FullMeta | 6.8M | 9.3577 | ✅ Stable |
+| C_MetaLite | 6.7M | 9.3512 | ✅ Good |
+| **D_External** | 6.7M | **9.3462** | 🏆 **Best** |
 
-**Training Configuration**:
-- Dataset: WikiText-103 (1.15M samples)
-- Batch Size: 16
-- Learning Rate: 8e-05
-- Optimizer: AdamW
-- Scheduler: CosineAnnealing
-- Epochs: 10
+**Finding**: On simple tasks, external scheduling outperforms internal metacognition.
 
-**Overfitting Analysis**:
-- Epoch 8 → 9: Val Loss increased 83% (0.0006 → 0.0011)
-- Metacognition triggered at Confidence > 0.92
-- Optimal early stopping point: Epoch 8
+### Complex Task Validation
 
-### Experiment 10: Ablation Study B (Metacognition)
+**Status**: ✅ Completed
 
-**Status**: 🔄 In Progress
+| Model | Train Loss | Val Loss | Gap | Status |
+|-------|------------|----------|-----|--------|
+| A_NoMeta | 10.43 | 11.14 | - | ✅ Stable |
+| B_FullMeta | **5.26** | 11.14 | **2.1x** | ⚠️ Overfits |
+| **C_MetaLite** | 10.47 | **11.14** | - | 🏆 **Best** |
+| D_External | 10.44 | 11.14 | - | ✅ Stable |
 
-**Purpose**: Validate metacognition layer's contribution to overfitting prevention
-
-**Ablation Configuration**:
-- Metacognition Layer: **Disabled**
-- Learning Rate Schedule: Fixed (no adaptive adjustment)
-
-**Expected Result**: If metacognition is effective, overfitting should occur around Epoch 7-8
-
-**Current Progress**:
-- Started: 2026-03-15 22:58
-- Epoch 1 Val Loss: 0.0014
-- Status: Running
-
-## Ablation Study Plan
-
-| Priority | Experiment | Component | Status |
-|----------|------------|-----------|--------|
-| 1 | B | Metacognition Layer | 🔄 Running |
-| 2 | C | Dynamic Routing | ⏳ Planned |
-| 3 | A | Consciousness Layer | ⏳ Planned |
-| 4 | D | Baseline Comparison | ⏳ Planned |
-
-## Model Files
-
-Due to size constraints, model weights are not included in this repository.
-
-**Model Metadata**: See `models/model_metadata.json` for complete configuration and training details.
+**Finding**: FullMeta overfits on complex tasks (Train 5.26 vs Val 11.14). MetaLite achieves best balance.
 
 ## Code Structure
 
 ```
 .
-├── experiment_06_wikitext.py      # Initial WikiText experiments
-├── experiment_07_wikitext103.py   # WikiText-103 baseline
-├── experiment_08_multiworld.py    # Multi-world SSM prototype
+├── experiments/
+│   ├── exp10_metalite.py              # MetaLite experiments
+│   ├── complex_task_validation.py     # Complex task experiments
+│   ├── exp10_metalite_design.md       # Design document
+│   └── research_findings_2026-03-18.md
+├── asn/
+│   ├── __init__.py
+│   ├── complexity_estimator.py        # Task complexity estimation
+│   ├── gumbel_selector.py             # Differentiable module selection
+│   ├── l0_regularizer.py              # Connection-level sparsity
+│   ├── asn_module.py                  # ASN core module
+│   ├── test_asn.py                    # Test suite (5/5 passed)
+│   └── README.md
 ├── models/
-│   └── model_metadata.json        # Model configuration & metrics
-└── RESEARCH_REPORT.md             # Detailed experiment report
+│   └── model_metadata.json
+└── README.md
 ```
 
 ## Requirements
@@ -113,36 +131,29 @@ numpy
 tqdm
 ```
 
-## Dataset
+## Training Recommendations
 
-**WikiText-103**
-- Training samples: 1,151,432
-- Vocabulary size: 10,000 (custom tokenizer)
-- Average sequence length: 256 tokens
+Based on our experiments:
 
-## Training
-
-Experiments were conducted on AutoDL GPU servers with RTX 6000 Ada (96GB VRAM).
-
-```bash
-python experiment_09_sewn_prototype.py --epochs 10 --batch_size 16 --lr 8e-5
-```
+1. **Learning Rate**: Use 5e-5 (not 8e-5)
+2. **Gradient Clipping**: Always use max_norm=1.0
+3. **Metacognition**: Use MetaLite (lightweight design)
+4. **Early Stopping**: patience=3 epochs
 
 ## Results Summary
 
-| Experiment | Description | Val Loss | Status |
-|------------|-------------|----------|--------|
-| Exp 8 | Multi-world SSM baseline | - | ✅ Complete |
-| Exp 9 | SEWN Prototype | 0.0006 | ✅ Complete |
-| Exp 10 | Ablation B (Metacognition) | - | 🔄 Running |
+| Experiment | Description | Key Result | Status |
+|------------|-------------|------------|--------|
+| Exp 9 | SEWN Prototype | Val Loss 0.0006 | ✅ |
+| Exp 10 | Metacognition Ablation | Crash at Epoch 5 | ✅ |
+| MetaLite | Simple Task | D_External best | ✅ |
+| Complex | Complex Task | C_MetaLite best | ✅ |
 
 ## Citation
 
-If you use this code or find it helpful, please cite:
-
 ```bibtex
 @misc{sewn2026,
-  title={SEWN: Self-Evolving World Model},
+  title={SEWN: Self-Evolving World Model with Conditional Metacognition},
   author={SEWN Research Team},
   year={2026},
   url={https://github.com/xxxjack/SEWN}
@@ -152,7 +163,3 @@ If you use this code or find it helpful, please cite:
 ## License
 
 MIT License
-
-## Contact
-
-For questions or collaboration opportunities, please open an issue on GitHub.
